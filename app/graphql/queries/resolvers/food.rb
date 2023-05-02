@@ -29,7 +29,6 @@ module Queries
                 dishesfood = ::DishesFood.where(food_id: food.id).distinct(:name)
                 [{
                     name: food.name,
-                    price: food.price,
                     day: deadline,
                     remains: remains,
                     dish: dishesfood,

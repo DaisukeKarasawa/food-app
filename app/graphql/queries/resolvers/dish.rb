@@ -8,10 +8,11 @@ module Queries
             def resolve(name:)
                 dishes = ::Dish.where(name: name)
                 results = dishes.map do |dish|
-                    urls = ::RecipeUrl.where(dish_id: dish.id)
+                    foods = DishesFood.where(dish_id: dish.id)
                     {
                         name: dish.name,
-                        recipe_urls: urls
+                        url: dish.url,
+                        foods: foods
                     }
                 end
                 results
