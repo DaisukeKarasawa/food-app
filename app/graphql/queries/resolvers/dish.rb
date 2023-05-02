@@ -7,6 +7,7 @@ module Queries
 
             def resolve(name:)
                 dishes = ::Dish.where(name: name)
+                return [] if !dishes
                 results = dishes.map do |dish|
                     foods = DishesFood.where(dish_id: dish.id)
                     {

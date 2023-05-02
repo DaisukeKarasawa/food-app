@@ -7,7 +7,7 @@ module Queries
 
             def resolve(name:)
                 shop = ::Shop.find_by(name: name)
-                return [] unless shop
+                return [] if !shop
                 foods = ::FoodsShop.where(shop_id: shop.id)
                 [{
                     name: shop.name,
