@@ -2,7 +2,7 @@ module Queries
     module Resolvers
         class Food < GraphQL::Schema::Resolver
             type [Types::FoodType], null: false
-            description "Foodそれぞれの情報取得"
+            description "Foodの詳細情報取得"
             argument :name, String, required: true
 
             def remainDay(year, month, day)
