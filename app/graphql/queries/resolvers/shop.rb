@@ -8,10 +8,9 @@ module Queries
             def resolve(name:)
                 shop = ::Shop.find_by(name: name)
                 return [] if !shop
-                foods = ::FoodsShop.where(shop_id: shop.id)
                 [{
                     name: shop.name,
-                    foods: foods
+                    foods: shop.foods
                 }]
             end
         end

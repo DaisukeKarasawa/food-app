@@ -78,14 +78,10 @@ Apollo サーバーに加え、フロントのフレームワークの学習が�
     name
     remains
     dishes {
-      dish {
-        name
-      }
+      name
     }
     shops {
-      shop {
-        name
-      }
+      name
     }
   }
 }
@@ -101,31 +97,15 @@ Apollo サーバーに加え、フロントのフレームワークの学習が�
         "remains": "2",
         "dishes": [
           {
-            "dish": {
-              "name": "野菜炒め"
-            }
-          },
-          {
-            "dish": {
-              "name": "野菜炒め"
-            }
-          },
-          {
-            "dish": {
-              "name": "サラダ"
-            }
+            "name": "野菜炒め"
           }
         ],
         "shops": [
           {
-            "shop": {
-              "name": "スーパーA"
-            }
+            "name": "スーパーA"
           },
           {
-            "shop": {
-              "name": "スーパーB"
-            }
+            "name": "スーパーB"
           }
         ]
       }
@@ -145,7 +125,9 @@ Apollo サーバーに加え、フロントのフレームワークの学習が�
 {
   dishes {
     name
-    url
+    recipeUrls {
+      url
+    }
   }
 }
 ```
@@ -157,19 +139,22 @@ Apollo サーバーに加え、フロントのフレームワークの学習が�
     "dishes": [
       {
         "name": "カレー",
-        "url": "http://example.com/curry"
+        "recipeUrls": [
+          {
+            "url": "http://example.com/curry_recipe1"
+          }
+        ]
       },
       {
         "name": "野菜炒め",
-        "url": "http://example.com/fries1"
-      },
-      {
-        "name": "野菜炒め",
-        "url": "http://example.com/fries2"
-      },
-      {
-        "name": "サラダ",
-        "url": "http://example.com/salad"
+        "recipeUrls": [
+          {
+            "url": "http://example.com/fried_vegetable_recipe1"
+          },
+          {
+            "url": "http://example.com/fried_vegetable_recipe2"
+          }
+        ]
       }
     ]
   }
@@ -187,11 +172,11 @@ Apollo サーバーに加え、フロントのフレームワークの学習が�
 {
   dish(name: "野菜炒め") {
     name
-    url
+    recipeUrls {
+      url
+    }
     foods {
-      food {
-        name
-      }
+      name
     }
   }
 }
@@ -204,33 +189,20 @@ Apollo サーバーに加え、フロントのフレームワークの学習が�
     "dish": [
       {
         "name": "野菜炒め",
-        "url": "http://example.com/fries1",
-        "foods": [
+        "recipeUrls": [
           {
-            "food": {
-              "name": "キャベツ"
-            }
+            "url": "http://example.com/fried_vegetable_recipe1"
           },
           {
-            "food": {
-              "name": "たまねぎ"
-            }
+            "url": "http://example.com/fried_vegetable_recipe2"
           }
-        ]
-      },
-      {
-        "name": "野菜炒め",
-        "url": "http://example.com/fries2",
+        ],
         "foods": [
           {
-            "food": {
-              "name": "キャベツ"
-            }
+            "name": "キャベツ"
           },
           {
-            "food": {
-              "name": "たまねぎ"
-            }
+            "name": "たまねぎ"
           }
         ]
       }
@@ -251,10 +223,8 @@ Apollo サーバーに加え、フロントのフレームワークの学習が�
   shop(name: "スーパーA") {
     name
     foods {
-      food {
-        name
-        price
-      }
+      name
+      price
     }
   }
 }
@@ -269,28 +239,20 @@ Apollo サーバーに加え、フロントのフレームワークの学習が�
         "name": "スーパーA",
         "foods": [
           {
-            "food": {
-              "name": "にんじん",
-              "price": 100
-            }
+            "name": "にんじん",
+            "price": 100
           },
           {
-            "food": {
-              "name": "たまねぎ",
-              "price": 80
-            }
+            "name": "たまねぎ",
+            "price": 80
           },
           {
-            "food": {
-              "name": "キャベツ",
-              "price": 120
-            }
+            "name": "キャベツ",
+            "price": 120
           },
           {
-            "food": {
-              "name": "牛肉",
-              "price": 500
-            }
+            "name": "牛肉",
+            "price": 500
           }
         ]
       }

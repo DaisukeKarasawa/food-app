@@ -9,11 +9,10 @@ module Queries
                 dishes = ::Dish.where(name: name)
                 return [] if !dishes
                 results = dishes.map do |dish|
-                    foods = DishesFood.where(dish_id: dish.id)
                     {
                         name: dish.name,
-                        url: dish.url,
-                        foods: foods
+                        recipe_urls: dish.recipe_urls,
+                        foods: dish.foods
                     }
                 end
                 results

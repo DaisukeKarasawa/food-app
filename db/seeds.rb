@@ -6,15 +6,12 @@ beef = Food.create(name: '牛肉', deadline: 230503, price: 500)
 
 # Dishes
 curry = Dish.create(name: 'カレー', url: 'http://example.com/curry')
-fried_vegetable1 = Dish.create(name: '野菜炒め', url: 'http://example.com/fries1')
-fried_vegetable2 = Dish.create(name: '野菜炒め', url: 'http://example.com/fries2')
-salad = Dish.create(name: 'サラダ', url: 'http://example.com/salad')
+fried_vegetable = Dish.create(name: '野菜炒め', url: 'http://example.com/fries1')
 
-# Recipes
-curry_recipe = RecipeUrl.create(url: 'http://example.com/curry', dish: curry)
-fried_vegetable1_recipe = RecipeUrl.create(url: 'http://example.com/fries1', dish: fried_vegetable1)
-fried_vegetable2_recipe = RecipeUrl.create(url: 'http://example.com/fries2', dish: fried_vegetable2)
-salad_recipe = RecipeUrl.create(url: 'http://example.com/salad', dish: salad)
+# RecipeUrls
+curry_recipe = RecipeUrl.create(url: 'http://example.com/curry_recipe1', dish: curry)
+fried_vegetable_recipe1 = RecipeUrl.create(url: 'http://example.com/fried_vegetable_recipe1', dish: fried_vegetable)
+fried_vegetable_recipe2 = RecipeUrl.create(url: 'http://example.com/fried_vegetable_recipe2', dish: fried_vegetable)
 
 # Shops
 shop_a = Shop.create(name: 'スーパーA')
@@ -32,8 +29,5 @@ FoodsShop.create(shop: shop_b, food: cabbage)
 # Dishes_Foods
 DishesFood.create(dish: curry, food: carrot)
 DishesFood.create(dish: curry, food: beef)
-DishesFood.create(dish: fried_vegetable1, food: cabbage)
-DishesFood.create(dish: fried_vegetable1, food: onion)
-DishesFood.create(dish: fried_vegetable2, food: cabbage)
-DishesFood.create(dish: fried_vegetable2, food: onion)
-DishesFood.create(dish: salad, food: cabbage)
+DishesFood.create(dish: fried_vegetable, food: cabbage)
+DishesFood.create(dish: fried_vegetable, food: onion)
