@@ -6,7 +6,7 @@ module Types
     field :day, String, null: true
     field :remains, String, null: true
     field :price, Integer, null: false
-    field :dishes, [Types::DishType], null: false
+    field :dishes, [Types::DishType], null: true
     field :shops, [Types::ShopType], null: true
   end
 end
