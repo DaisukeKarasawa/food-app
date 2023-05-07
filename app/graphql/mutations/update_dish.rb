@@ -7,28 +7,39 @@ module Mutations
     argument :foods, [String], required: true
 
     def resolve(**args)
-      dish = Dish.find_by(name: args[:name])
-      return { food: nil } if !dish
+      dish = nil
+      errors = []
 
-      foods = args[:foods]
-      foods.each do |food|
-        existFood = Food.find_by(name: food)
-        if existFood && !dish.foods.include?(food)
-          DishesFood.find_or_create_by(food: existFood, dish: dish)
+      ActiveRecord::Base.transaction do
+        if args[:name] && args[:foods]
+          dish = Dish.find_by(name: args[:name])
+          return { food: nil } if !dish
+
+          foods = args[:foods]
+          foods.each do |food|
+            existFood = Food.find_by(name: food)
+            if existFood && !dish.foods.include?(food)
+              DishesFood.find_or_create_by(food: existFood, dish: dish)
+            else
+              next
+            end
+          end
         else
-          next
+          errors << "Name can't be blank, Foods can't be blank"
+          raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
         end
       end
 
-      if dish.errors.empty?
+      if dish.present? && errors.empty?
         {
           dish: dish,
-          errors: []
+          errors: errors
         }
       else
+        raise ActiveRecord::Rollback
         {
           dish: nil,
-          errors: dish.errors.full_messages
+          errors: errors.presence || ["Failed to create dish"]
         }
       end
     end
