@@ -18,6 +18,9 @@ module Mutations
       ActiveRecord::Base.transaction do
         # Food作成
         if args[:name].present? && args[:deadline].present? && args[:price].present?
+          deadline = args[:deadline]
+          day, remains = changeToDate(deadline)
+          return { food: nil } if !remains
           food = Food.create(name: args[:name], deadline: args[:deadline], price: args[:price])
         else
           errors << "Failed to create food. Name, deadline, and price are required."

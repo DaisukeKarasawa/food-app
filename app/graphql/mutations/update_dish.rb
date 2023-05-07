@@ -13,12 +13,12 @@ module Mutations
       ActiveRecord::Base.transaction do
         if args[:name] && args[:foods]
           dish = Dish.find_by(name: args[:name])
-          return { food: nil } if !dish
+          return { food: nil } if !dish.present?
 
           foods = args[:foods]
           foods.each do |food|
             existFood = Food.find_by(name: food)
-            if existFood && !dish.foods.include?(food)
+            if existFood.present? && !dish.foods.include?(food)
               DishesFood.find_or_create_by(food: existFood, dish: dish)
             else
               next
