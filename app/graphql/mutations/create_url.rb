@@ -1,45 +1,38 @@
 module Mutations
   class CreateUrl < BaseMutation
-    field :recipeUrls, [Types::RecipeUrlType], null: true
+    field :dish, Types::DishType, null: true
     field :errors, [String], null: true
 
     argument :recipeUrls, [String], required: true
     argument :name, String, required: true
 
     def resolve(**args)
-      dish = Dish.find_by(name: args[:name])
-      if !dish
-        return {
-          recipeUrls: nil,
-          errors: ["#{args[:name]}は登録されていません。"]
-        }
+      dish = nil
+      errors = []
+
+      if args[:recipeUrls].present? && args[:name].present?
+        dish = Dish.find_by(name: args[:name])
+      else
+        errors << "Name is required to search for recipes."
+        raise ActiveRecord::RecordInvalid.new(Dish.new), errors.join(", ")
+      end
+
+      if !dish.present?
+        errors << "Dish with name '#{args[:name]}' not found"
+        raise ActiveRecord::RecordInvalid.new(Dish.new), errors.join(", ")
       end
 
       # RecipeUrl作成とDishとの紐付け
-      urls = args[:recipeUrls].map do |url|
+      args[:recipeUrls].each do |url|
         if !RecipeUrl.find_by(url: url)
           RecipeUrl.create(url: url, dish: dish)
         else
           next
         end
-      end.compact
-
-      dish.recipe_urls << urls
-
-      # if !urls.include?(nil)
-      #   {
-      #     urls: urls,
-      #     errors: []
-      #   }
-      # else
-      #   {
-      #     urls: nil,
-      #     errors: ["すでに登録されているURLが含まれています。"]
-      #   }
-      # end
+      end
       {
-        recipeUrls: urls,
-        errors: []
+        dish: dish,
+        errors: errors
       }
     end
   end

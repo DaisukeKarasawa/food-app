@@ -7,40 +7,57 @@ module Mutations
     argument :deadline, Integer, required: true
     argument :price, Integer, required: true
     argument :dishes, [String], required: false
-    argument :shops, [String], required: true
+    argument :shop, String, required: true
 
     def resolve(**args)
       return { food: nil } if Food.find_by(name: args[:name])
-      # Food作成
-      food = Food.create(name: args[:name], deadline: args[:deadline], price: args[:price])
 
-      # Dish作成とFoodとの紐付け
-      if args[:dishes]
-        args[:dishes].each do |dishName|
-          if !Dish.find_by(name: dishName)
-            dish = Dish.create(name: dishName)
-            dish.foods << food
-            DishesFood.find_or_create_by(dish: dish, food: food)
+      food = nil
+      errors = []
+
+      ActiveRecord::Base.transaction do
+        # Food作成
+        if args[:name].present? && args[:deadline].present? && args[:price].present?
+          food = Food.create(name: args[:name], deadline: args[:deadline], price: args[:price])
+        else
+          errors << "Failed to create food. Name, deadline, and price are required."
+          raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
+        end
+
+        # Dish作成とFoodとの紐付け
+        if args[:dishes].present?
+          args[:dishes].each do |dish|
+            existDish = Dish.find_by(name: dish)
+            if existDish
+              DishesFood.find_or_create_by(dish: existDish, food: food)
+            else
+              errors << "Dish '#{dish}' not found"
+              raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
+            end
           end
         end
-      end
 
-      # Shop作成とFoodとの紐付け
-      args[:shops].each do |shopName|
-        shop = Shop.find_or_create_by(name: shopName)
-        shop.foods << food
-        FoodsShop.find_or_create_by(shop: shop, food: food)
-      end
+        # Shop作成とFoodとの紐付け
+        if args[:shop].present?
+          newShop = Shop.find_or_create_by(name: args[:shop])
+          FoodsShop.find_or_create_by(shop: newShop, food: food)
+        else
+          errors << "Shop can't be blank."
+          raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
+        end
 
-      if food.errors.empty?
+      end
+      
+      if food.present? && errors.empty?
         {
           food: food,
-          errors: []
+          errors: errors
         }
       else
+        raise ActiveRecord::Rollback
         {
           food: nil,
-          errors: food.errors.full_messages
+          errors: errors.presence || ["Failed to create food"]
         }
       end
     end

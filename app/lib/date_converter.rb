@@ -2,7 +2,7 @@ module DateConverter
     include RemainDay
 
     def changeToDate(deadline)
-        return nil unless deadline.to_s.length == 6
+        return nil, nil if deadline.to_s.length != 6
         
         year = deadline / 10000
         month = (deadline % 10000) / 100

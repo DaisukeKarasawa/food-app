@@ -7,6 +7,6 @@ module Types
     field :remains, String, null: true
     field :price, Integer, null: false
     field :dishes, [Types::DishType], null: true
-    field :shops, [Types::ShopType], null: true
+    field :shops, [Types::ShopType], null: false
   end
 end
