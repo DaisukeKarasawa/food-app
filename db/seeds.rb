@@ -1,8 +1,8 @@
 # Foods
-carrot = Food.create(name: 'にんじん', deadline: 230507, price: 100)
-onion = Food.create(name: 'たまねぎ', deadline: 230510, price: 80)
-cabbage = Food.create(name: 'キャベツ', deadline: 230505, price: 120)
-beef = Food.create(name: '牛肉', deadline: 230503, price: 500)
+carrot = Food.create(name: 'にんじん', deadline: 270507, price: 100)
+onion = Food.create(name: 'たまねぎ', deadline: 270510, price: 80)
+cabbage = Food.create(name: 'キャベツ', deadline: 270505, price: 120)
+beef = Food.create(name: '牛肉', deadline: 270503, price: 500)
 
 # Dishes
 curry = Dish.create(name: 'カレー', url: 'http://example.com/curry')
