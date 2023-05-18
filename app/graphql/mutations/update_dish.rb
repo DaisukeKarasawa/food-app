@@ -1,5 +1,9 @@
 module Mutations
   class UpdateDish < BaseMutation
+    include ValidateDishData,
+            ValidateFoodsData,
+            FindData
+
     field :dish, Types::DishType, null: true
     field :errors, [String], null: true
 
@@ -9,25 +13,16 @@ module Mutations
     def resolve(**args)
       dish = nil
       errors = []
+      action = "update"
 
       ActiveRecord::Base.transaction do
-        if args[:name] && args[:foods]
-          dish = Dish.find_by(name: args[:name])
-          return { food: nil } if !dish.present?
+        dishName = args[:name]
+        action = "Dish"
 
-          foods = args[:foods]
-          foods.each do |food|
-            existFood = Food.find_by(name: food)
-            if existFood.present? && !dish.foods.include?(food)
-              DishesFood.find_or_create_by(food: existFood, dish: dish)
-            else
-              next
-            end
-          end
-        else
-          errors << "Name can't be blank, Foods can't be blank"
-          raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
-        end
+        validateDishData(dishName, action, errors)
+        validateFoodsData(args[:foods], action, errors)
+        dish = findData(dishName, action, errors)
+        linkFoods(dish, args[:foods], errors)
       end
 
       if dish.present? && errors.empty?
@@ -41,6 +36,20 @@ module Mutations
           dish: nil,
           errors: errors.presence || ["Failed to create dish"]
         }
+      end
+    end
+
+    private
+
+    # Dish と Food の紐付け
+    def linkFoods(dish, foods, errors)
+      foods.each do |food|
+        existFood = Food.find_by(name: food)
+        if existFood.present? && !dish.foods.include?(food)
+          DishesFood.find_or_create_by(food: existFood, dish: dish)
+        else
+          next
+        end
       end
     end
   end
