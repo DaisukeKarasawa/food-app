@@ -1,6 +1,6 @@
 module LinkFoodToDish
     def linkFoodToDish(main, arr, link, errors)
-        action = link == 'Dish' ? true : false
+        action = link == 'Dish'
         arr.each do |ele|
             existEle = action ? Dish.find_by(name: ele) : Food.find_by(name: ele)
             if existEle && action
