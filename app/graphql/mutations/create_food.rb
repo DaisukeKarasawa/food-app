@@ -1,6 +1,7 @@
 module Mutations
   class CreateFood < BaseMutation
-    include DateConverter
+    include DateConverter,
+            LinkFoodToDish
     
     field :food, Types::FoodType, null: true
     field :errors, [String], null: true
@@ -20,7 +21,7 @@ module Mutations
       ActiveRecord::Base.transaction do
         validateFoodData(args, errors)
         food = createFood(args[:name], args[:deadline], args[:price])
-        linkDishes(food, args[:dishes], errors) if args[:dishes].present?
+        linkFoodToDish(food, args[:dishes], "Dish", errors) if args[:dishes].present?
         linkShop(food, args[:shop], errors)
       end
       
@@ -53,22 +54,15 @@ module Mutations
       day, remains = changeToDate(deadline)
       raise ActiveRecord::RecordInvalid.new(Food.new), "Invalid deadline." unless remains
 
-      Food.create!(name: name, deadline: deadline, price: price)
-    end
-
-    # Food と Dish の紐づけ
-    def linkDishes(food, dishes, errors)
-      dishes.each do |dish|
-        existDish = Dish.find_by(name: dish)
-        if existDish.present?
-          DishesFood.find_or_create_by(dish: existDish, food: food)
-        else
-          errors << "Dish '#{dish}' not found"
-          raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
-        end
+      existFood = Food.find_by(name: name)
+      if !existFood.present?
+        Food.create!(name: name, deadline: deadline, price: price)
+      else
+        errors << "The food name '#{name}' already exists."
+        raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
       end
     end
-
+    
     # Food と Shop の紐づけ
     def linkShop(food, shopName, errors)
       if shopName.present?

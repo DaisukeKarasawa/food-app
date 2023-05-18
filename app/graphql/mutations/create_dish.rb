@@ -1,6 +1,9 @@
 module Mutations
   class CreateDish < BaseMutation
-    include LinkUrls
+    include LinkUrls,
+            ValidateDishData,
+            ValidateFoodsData,
+            LinkFoodToDish
 
     field :dish, Types::DishType, null: true
     field :errors, [String], null: true
@@ -14,11 +17,15 @@ module Mutations
 
       dish = nil
       errors = []
+      action = "create"
 
       ActiveRecord::Base.transaction do
-        validateDishData(args, errors)
-        dish = createDish(args[:name])
-        linkFoods(dish, args[:foods], errors)
+        dishName = args[:name]
+
+        validateDishData(dishName, action, errors)
+        validateFoodsData(args[:foods], action, errors)
+        dish = createDish(dishName, errors)
+        linkFoodToDish(dish, args[:foods], "Food", errors)
         linkUrls(dish, args[:recipeUrls], errors) if args[:recipeUrls].present?
       end
 
@@ -38,33 +45,13 @@ module Mutations
 
     private
 
-    # バリデーション
-    def validateDishData(args, errors)
-      return if args[:name].present?
-
-      errors << "Failed to create dish. Name is required."
-      raise ActiveRecord::RecordInvalid.new(Dish.new), errors.join(", ")
-    end
-
     # Dish 作成
-    def createDish(name)
-      Dish.create!(name: name)
-    end
-
-    # Dish と Food の紐づけ
-    def linkFoods(dish, foods, errors)
-      if foods.present?
-        foods.each do |food|
-          existFood = Food.find_by(name: food)
-          if existFood
-            DishesFood.find_or_create_by(dish: dish, food: existFood)
-          else
-            errors << "Food '#{food}' not found"
-            raise ActiveRecord::RecordInvalid.new(Dish.new), errors.join(", ")
-          end
-        end
+    def createDish(name, errors)
+      existDish = Dish.find_by(name: name)
+      if !existDish.present?
+        Dish.create!(name: name)
       else
-        errors << "Food can't be blank."
+        errors << "The dish name '#{name}' already exists."
         raise ActiveRecord::RecordInvalid.new(Dish.new), errors.join(", ")
       end
     end
