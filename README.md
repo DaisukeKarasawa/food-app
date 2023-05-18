@@ -21,6 +21,17 @@
 Apollo サーバーに加え、フロントエンドのフレームワークの学習が行えていないが、GraphQL を使用した API 開発を行いたかったので、そのアウトプットの一歩目として選択した。
 元から食材管理ができるシステムを自分で開発し、自宅で使用したいと考えていたので、今後、フロントと繋いで一つのアプリケーションとして動かせるようにしたいと思っている。
 
+### 初期データの登録
+
+テストデータをデータベースへ登録する。
+
+※機能を分かりやすくするため、初期データの賞味期限はかなり先に設定されている。
+
+```
+rails db:migrate
+rails db:seed
+```
+
 ### - 主な機能(クエリ) -
 
 - **全ての食材の一覧取得**
@@ -274,10 +285,10 @@ Apollo サーバーに加え、フロントエンドのフレームワークの�
 mutation {
   createFood(input: {
     name: "じゃがいも"
-    deadline: 230508
+    deadline: 230712
     price: 100
     dishes: ["カレー"]
-    shop: "スーパーC"
+    shop: "スーパーA"
   }) {
     food {
       name
@@ -344,9 +355,9 @@ mutation {
 # ミューテーション(作成)
 mutation {
   createDish(input: {
-    name: "だし巻き卵"
-    recipeUrls: ["http://example.com/japanese_omelet_recipe"]
-    foods: ["卵"]
+    name: "ポテトサラダ"
+    recipeUrls: ["http://example.com/potato_salad_recipe"]
+    foods: ["じゃがいも"]
   }) {
     dish {
       name
@@ -364,10 +375,10 @@ mutation {
   "data": {
     "createDish": {
       "dish": {
-        "name": "だし巻き卵",
+        "name": "ポテトサラダ",
         "foods": [
           {
-            "name": "卵"
+            "name": "じゃがいも"
           }
         ]
       }
