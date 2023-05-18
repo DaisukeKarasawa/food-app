@@ -1,5 +1,7 @@
 module Mutations
   class CreateFood < BaseMutation
+    include DateConverter
+    
     field :food, Types::FoodType, null: true
     field :errors, [String], null: true
 
@@ -16,45 +18,16 @@ module Mutations
       errors = []
 
       ActiveRecord::Base.transaction do
-        # Food作成
-        if args[:name].present? && args[:deadline].present? && args[:price].present?
-          deadline = args[:deadline]
-          day, remains = changeToDate(deadline)
-          return { food: nil } if !remains
-          food = Food.create(name: args[:name], deadline: args[:deadline], price: args[:price])
-        else
-          errors << "Failed to create food. Name, deadline, and price are required."
-          raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
-        end
-
-        # Dish作成とFoodとの紐付け
-        if args[:dishes].present?
-          args[:dishes].each do |dish|
-            existDish = Dish.find_by(name: dish)
-            if existDish
-              DishesFood.find_or_create_by(dish: existDish, food: food)
-            else
-              errors << "Dish '#{dish}' not found"
-              raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
-            end
-          end
-        end
-
-        # Shop作成とFoodとの紐付け
-        if args[:shop].present?
-          newShop = Shop.find_or_create_by(name: args[:shop])
-          FoodsShop.find_or_create_by(shop: newShop, food: food)
-        else
-          errors << "Shop can't be blank."
-          raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
-        end
-
+        validateFoodData(args, errors)
+        food = createFood(args[:name], args[:deadline], args[:price])
+        linkDishes(food, args[:dishes], errors) if args[:dishes].present?
+        linkShop(food, args[:shop], errors)
       end
       
       if food.present? && errors.empty?
         {
           food: food,
-          errors: errors
+          errors: nil
         }
       else
         raise ActiveRecord::Rollback
@@ -62,6 +35,48 @@ module Mutations
           food: nil,
           errors: errors.presence || ["Failed to create food"]
         }
+      end
+    end
+
+    private
+    
+    # バリデーション
+    def validateFoodData(args, errors)
+      return if args[:name].present? && args[:deadline].present? && args[:price].present?
+
+      errors << "Failed to create food. Name, deadline, and price are required."
+      raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
+    end
+
+    # Food 作成
+    def createFood(name, deadline, price)
+      day, remains = changeToDate(deadline)
+      raise ActiveRecord::RecordInvalid.new(Food.new), "Invalid deadline." unless remains
+
+      Food.create!(name: name, deadline: deadline, price: price)
+    end
+
+    # Food と Dish の紐づけ
+    def linkDishes(food, dishes, errors)
+      dishes.each do |dish|
+        existDish = Dish.find_by(name: dish)
+        if existDish.present?
+          DishesFood.find_or_create_by(dish: existDish, food: food)
+        else
+          errors << "Dish '#{dish}' not found"
+          raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
+        end
+      end
+    end
+
+    # Food と Shop の紐づけ
+    def linkShop(food, shopName, errors)
+      if shopName.present?
+        newShop = Shop.find_or_create_by(name: shopName)
+        FoodsShop.find_or_create_by(shop: newShop, food: food)
+      else
+        errors << "Shop can't be blank."
+        raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
       end
     end
   end
