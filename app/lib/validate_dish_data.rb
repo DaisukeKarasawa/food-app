@@ -1,6 +1,6 @@
 module ValidateDishData
     def validateDishData(dish, action, errors)
-        return unless dish
+        return if dish.present?
 
         errorMessage = if action == "createUrl"
                             "Dish can't be blank."
