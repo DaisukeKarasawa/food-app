@@ -496,13 +496,13 @@ mutation {
 
 削除ではなく更新にしたため、食品一覧取得時には賞味期限が切れている食材を表示せず、特定の食材やレシピ、店で購入できる食材の取得時など、賞味期限が関係していないクエリでは、食材が全て表示されるようにした。
 
-### - each メソッドと map メソッドの使い分け -
+### - データ操作 -
 
-ミューテージョンなどで、配列の要素に対して何か処理を行う際に、'map'メソッドを使用するか、'each'メソッドを使用するかを状況ごとに使い分けた。
+データ操作に対して、さまざまな工夫を加えた。
 
 - **データへのアクセス(dataloader)**
 
-N+1問題を解決すべく、GraphQL::Batchを使用し、データのアクセスを改善した。([GraphQL::Batchの実装](https://github.com/DaisukeKarasawa/dataloader))
+N+1 問題を解決すべく、GraphQL::Batch を使用し、データのアクセスを改善した。([GraphQL::Batch の実装](https://github.com/DaisukeKarasawa/dataloader))
 
 - **データへのアクセス(each/map)**
 
