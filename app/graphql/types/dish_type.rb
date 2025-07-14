@@ -5,8 +5,12 @@ module Types
     field :foods, [Types::FoodType], null: true
     field :recipe_urls, [Types::RecipeUrlType], null: true
 
+    def foods
+      object.foods.includes(:dishes, :shops)
+    end
+
     def recipe_urls
-      Loaders::AssociationLoader.for(Dish, :recipe_urls).load(object)
+      object.recipe_urls.order(:created_at)
     end
   end
 end

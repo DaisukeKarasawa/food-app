@@ -1,22 +1,13 @@
 module Queries
-    module Resolvers
-        class Dish < GraphQL::Schema::Resolver
-            type [Types::DishType], null: false
-            description "Dishの詳細情報取得"
-            argument :name, String, required: true
+  module Resolvers
+    class Dish < GraphQL::Schema::Resolver
+      type Types::DishType, null: true
+      description "Dishの詳細情報取得"
+      argument :name, String, required: true
 
-            def resolve(name:)
-                dishes = ::Dish.where(name: name)
-                return [] if !dishes
-                results = dishes.map do |dish|
-                    {
-                        name: dish.name,
-                        recipe_urls: dish.recipe_urls,
-                        foods: dish.foods
-                    }
-                end
-                results
-            end
-        end
+      def resolve(name:)
+        DishService.find_dish_by_name(name)
+      end
     end
+  end
 end
