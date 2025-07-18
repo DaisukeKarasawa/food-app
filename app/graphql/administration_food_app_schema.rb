@@ -49,4 +49,18 @@ class AdministrationFoodAppSchema < GraphQL::Schema
     full_global_id = "gid://#{GlobalID.app}/#{id}"
     GlobalID::Locator.locate(full_global_id)
   end
+  
+  # Add authentication context
+  def self.execute(query_str = nil, **kwargs)
+    # Extract the current user from the context
+    if kwargs[:context] && kwargs[:context][:request]
+      auth_header = kwargs[:context][:request].headers['Authorization']
+      if auth_header&.start_with?('Bearer ')
+        token = auth_header.sub('Bearer ', '')
+        kwargs[:context][:current_user] = User.decode_jwt(token)
+      end
+    end
+    
+    super(query_str, **kwargs)
+  end
 end

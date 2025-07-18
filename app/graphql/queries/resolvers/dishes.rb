@@ -5,7 +5,10 @@ module Queries
             description "Dishの一覧取得"
 
             def resolve
-                ::Dish.all
+                current_user = context[:current_user]
+                raise GraphQL::ExecutionError, "Authentication required" unless current_user
+                
+                current_user.dishes
             end
         end
     end

@@ -13,7 +13,10 @@ module Mutations
     argument :foods, [String], required: true
 
     def resolve(**args)
-      return { dish: nil } if Dish.find_by(name: args[:name])
+      current_user = context[:current_user]
+      raise GraphQL::ExecutionError, "Authentication required" unless current_user
+      
+      return { dish: nil } if current_user.dishes.find_by(name: args[:name])
 
       dish = nil
       errors = []
@@ -24,7 +27,7 @@ module Mutations
 
         validateDishData(dishName, action, errors)
         validateFoodsData(args[:foods], action, errors)
-        dish = createDish(dishName, errors)
+        dish = createDish(dishName, errors, current_user)
         linkFoodToDish(dish, args[:foods], "Food", errors)
         linkUrls(dish, args[:recipeUrls], errors) if args[:recipeUrls].present?
       end
@@ -46,10 +49,10 @@ module Mutations
     private
 
     # Dish 作成
-    def createDish(name, errors)
-      existDish = Dish.find_by(name: name)
+    def createDish(name, errors, user)
+      existDish = user.dishes.find_by(name: name)
       if !existDish.present?
-        Dish.create!(name: name)
+        user.dishes.create!(name: name)
       else
         errors << "The dish name '#{name}' already exists."
         raise ActiveRecord::RecordInvalid.new(Dish.new), errors.join(", ")

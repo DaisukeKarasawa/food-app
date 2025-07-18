@@ -10,12 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_04_30_175854) do
+ActiveRecord::Schema[7.0].define(version: 2025_07_18_102505) do
   create_table "dishes", force: :cascade do |t|
     t.string "name"
     t.string "url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_dishes_on_user_id"
   end
 
   create_table "dishes_foods", force: :cascade do |t|
@@ -33,6 +35,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_30_175854) do
     t.integer "price"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id", null: false
+    t.index ["user_id"], name: "index_foods_on_user_id"
   end
 
   create_table "foods_shops", force: :cascade do |t|
@@ -58,8 +62,19 @@ ActiveRecord::Schema[7.0].define(version: 2023_04_30_175854) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "users", force: :cascade do |t|
+    t.string "email", null: false
+    t.string "password_digest", null: false
+    t.string "name", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+  end
+
+  add_foreign_key "dishes", "users"
   add_foreign_key "dishes_foods", "dishes"
   add_foreign_key "dishes_foods", "foods"
+  add_foreign_key "foods", "users"
   add_foreign_key "foods_shops", "foods"
   add_foreign_key "foods_shops", "shops"
   add_foreign_key "recipe_urls", "dishes"

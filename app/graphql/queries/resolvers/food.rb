@@ -8,7 +8,10 @@ module Queries
             argument :name, String, required: true
             
             def resolve(name:)
-                food = ::Food.find_by(name: name)
+                current_user = context[:current_user]
+                raise GraphQL::ExecutionError, "Authentication required" unless current_user
+                
+                food = current_user.foods.find_by(name: name)
                 return [] if !food
                 _, remain = changeToDate(food.deadline)
                 [{

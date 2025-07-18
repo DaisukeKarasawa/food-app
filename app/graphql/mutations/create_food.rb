@@ -13,14 +13,17 @@ module Mutations
     argument :shop, String, required: true
 
     def resolve(**args)
-      return { food: nil } if Food.find_by(name: args[:name])
+      current_user = context[:current_user]
+      raise GraphQL::ExecutionError, "Authentication required" unless current_user
+      
+      return { food: nil } if current_user.foods.find_by(name: args[:name])
 
       food = nil
       errors = []
 
       ActiveRecord::Base.transaction do
         validateFoodData(args, errors)
-        food = createFood(args[:name], args[:deadline], args[:price])
+        food = createFood(args[:name], args[:deadline], args[:price], current_user)
         linkFoodToDish(food, args[:dishes], "Dish", errors) if args[:dishes].present?
         linkShop(food, args[:shop], errors)
       end
@@ -50,13 +53,13 @@ module Mutations
     end
 
     # Food 作成
-    def createFood(name, deadline, price)
+    def createFood(name, deadline, price, user)
       day, remains = changeToDate(deadline)
       raise ActiveRecord::RecordInvalid.new(Food.new), "Invalid deadline." unless remains
 
-      existFood = Food.find_by(name: name)
+      existFood = user.foods.find_by(name: name)
       if !existFood.present?
-        Food.create!(name: name, deadline: deadline, price: price)
+        user.foods.create!(name: name, deadline: deadline, price: price)
       else
         errors << "The food name '#{name}' already exists."
         raise ActiveRecord::RecordInvalid.new(Food.new), errors.join(", ")
