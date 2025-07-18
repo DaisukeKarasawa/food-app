@@ -6,7 +6,10 @@ module Queries
             argument :name, String, required: true
 
             def resolve(name:)
-                dishes = ::Dish.where(name: name)
+                current_user = context[:current_user]
+                raise GraphQL::ExecutionError, "Authentication required" unless current_user
+                
+                dishes = current_user.dishes.where(name: name)
                 return [] if !dishes
                 results = dishes.map do |dish|
                     {

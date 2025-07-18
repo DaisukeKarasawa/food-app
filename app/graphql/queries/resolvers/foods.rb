@@ -7,17 +7,15 @@ module Queries
             description "Foodの一覧取得"
 
             def resolve
-                foods = ::Food.all
-                results = foods.map do |food|
+                current_user = context[:current_user]
+                raise GraphQL::ExecutionError, "Authentication required" unless current_user
+                
+                foods = current_user.foods
+                # Filter out expired foods
+                foods.select do |food|
                     day, remain = changeToDate(food.deadline)
-                    if remain
-                        {
-                            name: food.name,
-                            day: day
-                        }
-                    end
-                end.compact
-                results
+                    remain # Only include foods that are still valid
+                end
             end
         end
     end

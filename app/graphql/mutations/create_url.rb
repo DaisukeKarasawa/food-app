@@ -11,6 +11,9 @@ module Mutations
     argument :name, String, required: true
 
     def resolve(**args)
+      current_user = context[:current_user]
+      raise GraphQL::ExecutionError, "Authentication required" unless current_user
+      
       dish = nil
       errors = []
       validateAction = "createUrl"
@@ -19,7 +22,7 @@ module Mutations
 
       validateUrlData(args, errors)
       validateDishData(dishName, validateAction, errors)
-      dish = findData(dishName, findAction, errors)
+      dish = findData(dishName, findAction, errors, current_user)
       linkUrls(dish, args[:recipeUrls], errors)
 
       if dish.present? && errors.empty?

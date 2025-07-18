@@ -12,13 +12,16 @@ module Mutations
     argument :shop, String, required: false
 
     def resolve(**args)
+      current_user = context[:current_user]
+      raise GraphQL::ExecutionError, "Authentication required" unless current_user
+      
       food = nil
       errors = []
       action = "Food"
 
       ActiveRecord::Base.transaction do
         validateFoodData(args, errors)
-        food = findData(args[:name], action, errors)
+        food = findData(args[:name], action, errors, current_user)
         updateFood(food, args, errors)
         updatePrice(food, args[:price]) if args[:price].present?
         addShop(food, args[:shop]) if args[:shop].present?

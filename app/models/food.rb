@@ -1,6 +1,7 @@
 class Food < ApplicationRecord
     validates :deadline, presence: true, length: { is: 6 }
 
+    belongs_to :user
     has_many :dishes_foods
     has_many :dishes, through: :dishes_foods
     has_many :foods_shops
