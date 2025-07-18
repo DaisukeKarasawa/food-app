@@ -11,6 +11,9 @@ module Mutations
     argument :foods, [String], required: true
 
     def resolve(**args)
+      current_user = context[:current_user]
+      raise GraphQL::ExecutionError, "Authentication required" unless current_user
+      
       dish = nil
       errors = []
       action = "update"
@@ -21,8 +24,8 @@ module Mutations
 
         validateDishData(dishName, action, errors)
         validateFoodsData(args[:foods], action, errors)
-        dish = findData(dishName, action, errors)
-        linkFoods(dish, args[:foods], errors)
+        dish = findData(dishName, action, errors, current_user)
+        linkFoods(dish, args[:foods], errors, current_user)
       end
 
       if dish.present? && errors.empty?
@@ -42,9 +45,9 @@ module Mutations
     private
 
     # Dish と Food の紐付け
-    def linkFoods(dish, foods, errors)
+    def linkFoods(dish, foods, errors, user)
       foods.each do |food|
-        existFood = Food.find_by(name: food)
+        existFood = user.foods.find_by(name: food)
         if existFood.present? && !dish.foods.include?(food)
           DishesFood.find_or_create_by(food: existFood, dish: dish)
         else
